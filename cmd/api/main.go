@@ -1,16 +1,15 @@
 package main
 
 import (
-    "fmt"
-    "log"
-    "net/http"
+	"log"
+	"net/http"
+
+	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/payments"
 )
 
-func handler(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Hello World")
-}
 
 func main() {
-    http.HandleFunc("/", handler)
+    http.HandleFunc("/payments", payments.HandleCreatePayment)
+    http.HandleFunc("/payments-summary", payments.HandleCreatePayment)
     log.Fatal(http.ListenAndServe(":8080", nil))
 }

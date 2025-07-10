@@ -1,0 +1,4 @@
+tmp/
+.air.toml
+*.log
+.git

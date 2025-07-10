@@ -28,7 +28,9 @@ x-service-templates:
 services:
 
   api01: &api
-      build: .
+      build:
+        context: .
+        target: prod
       hostname: api01
       environment:
         - APP_PORT=8080

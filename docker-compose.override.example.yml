@@ -1,0 +1,15 @@
+services:
+  api01: &api
+    image: 'api-rinha-de-backend-2025'
+    build: 
+      context: .
+      target: dev
+    volumes:
+      - .:/app
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "500MB"
+  api02:
+    <<: *api
