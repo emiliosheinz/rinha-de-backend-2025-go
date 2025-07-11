@@ -3,13 +3,22 @@ package main
 import (
 	"log"
 	"net/http"
+	"sync"
 
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/payments"
+	"github.com/emiliosheinz/rinha-de-backend-2025-go/package/queue"
 )
 
-
 func main() {
-    http.HandleFunc("/payments", payments.HandleCreatePayment)
-    http.HandleFunc("/payments-summary", payments.HandleCreatePayment)
-    log.Fatal(http.ListenAndServe(":8080", nil))
+	q := queue.NewInMemoryQueue(100)
+
+	wg := &sync.WaitGroup{}
+	queue.NewWorkerPool(5, q.GetJobs(), wg)
+
+	paymentsHandler := payments.NewPaymentsHandler(q)
+
+	http.HandleFunc("/payments", paymentsHandler.HandleCreatePayment)
+	http.HandleFunc("/payments-summary", paymentsHandler.HandleGetSummary)
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
