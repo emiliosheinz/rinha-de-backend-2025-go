@@ -31,6 +31,7 @@ func (w Worker) Start() {
 		defer w.wg.Done()
 		for job := range w.jobs {
 			if err := job.Execute(); err != nil {
+				// What if both tries fail, the job will fail, we need to handle that
 				log.Printf("worker %d: job error: %v", w.id, err)
 			}
 		}

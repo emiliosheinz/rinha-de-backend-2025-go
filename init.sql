@@ -1,7 +1,9 @@
-CREATE UNLOGGED TABLE payments (
-    correlationId UUID PRIMARY KEY,
-    amount DECIMAL NOT NULL,
-    requested_at TIMESTAMP NOT NULL
+DROP TABLE IF EXISTS payments;
+
+CREATE TABLE payments (
+  id SERIAL PRIMARY KEY,
+  correlation_id VARCHAR(255) NOT NULL,
+  amount DOUBLE PRECISION NOT NULL,
+  processed_at TIMESTAMP NOT NULL
 );
 
-CREATE INDEX payments_requested_at ON payments (requested_at);
