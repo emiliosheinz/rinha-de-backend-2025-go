@@ -5,11 +5,14 @@ import (
 	"net/http"
 	"sync"
 
+	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/config"
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/payments"
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/package/queue"
 )
 
 func main() {
+	config.Init()
+
 	q := queue.NewInMemoryQueue(100)
 
 	wg := &sync.WaitGroup{}
