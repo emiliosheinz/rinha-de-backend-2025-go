@@ -1,30 +1,3 @@
-x-service-templates:
-  payment-processor: &payment-processor
-    image: zanfranceschi/payment-processor:arm64
-    networks:
-      - payment-processor
-    deploy:
-      resources:
-        limits:
-          cpus: "1.5"
-          memory: "100MB"
-  
-  payment-processor-db: &payment-processor-db
-    image: postgres:17-alpine
-    networks:
-      - payment-processor
-    volumes:
-      - ./init-payment-processor-db.sql:/docker-entrypoint-initdb.d/init.sql
-    environment:
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=rinha
-    deploy:
-      resources:
-        limits:
-          cpus: "1.5"
-          memory: "250MB"
-
 services:
   api01: &api
       build:
@@ -41,6 +14,7 @@ services:
         - POSTGRES_DATABASE_NAME=${DATABASE_NAME}
         - POSTGRES_DATABASE_PORT=5432
       networks:
+        - rinha
         - payment-processor
       depends_on:
         - postgres-db
@@ -70,6 +44,7 @@ services:
         - api01
         - api02
       networks:
+        - rinha
         - payment-processor
       ports:
         # Obrigatório expor/usar a porta 9999 no load balancer!
@@ -91,6 +66,7 @@ services:
       volumes:
         - ./init.sql:/docker-entrypoint-initdb.d/script.sql
       networks:
+        - rinha
         - payment-processor
       deploy:
         resources:
@@ -98,54 +74,12 @@ services:
             cpus: '0.9'
             memory: '120MB'
 
-  payment-processor-1:
-    <<: *payment-processor
-    container_name: payment-processor-default
-    hostname: payment-processor-default
-    environment:
-      - TRANSACTION_FEE=0.05
-      - RATE_LIMIT_SECONDS=5
-      - INITIAL_TOKEN=123
-      - DB_CONNECTION_STRING=Host=payment-processor-default-db;Port=5432;Database=rinha;Username=postgres;Password=postgres;Minimum Pool Size=15;Maximum Pool Size=20;Connection Pruning Interval=3
-    ports:
-      - 8001:8080
-    depends_on:
-      - payment-processor-db-1
-    
-  payment-processor-db-1:
-    <<: *payment-processor-db
-    container_name: payment-processor-default-db
-    hostname: payment-processor-default-db
-    ports:
-      - 54321:5432
-
-  payment-processor-2:
-    <<: *payment-processor
-    container_name: payment-processor-fallback
-    hostname: payment-processor-fallback
-    environment:
-      - TRANSACTION_FEE=0.15
-      - RATE_LIMIT_SECONDS=5
-      - INITIAL_TOKEN=123
-      - DB_CONNECTION_STRING=Host=payment-processor-fallback-db;Port=5432;Database=rinha;Username=postgres;Password=postgres;Minimum Pool Size=15;Maximum Pool Size=20;Connection Pruning Interval=3
-    ports:
-      - 8002:8080
-    depends_on:
-      - payment-processor-db-2
-  
-  payment-processor-db-2:
-    <<: *payment-processor-db
-    container_name: payment-processor-fallback-db
-    hostname: payment-processor-fallback-db
-    ports:
-      - 54322:5432
-
 volumes:
   postgres_data:
 
 networks:
   payment-processor:
-    name: payment-processor
+    external: true
+  rinha:
     driver: bridge
-
 
