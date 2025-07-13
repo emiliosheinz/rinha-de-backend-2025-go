@@ -13,6 +13,10 @@ type ProcessPaymentJob struct {
 	service *PaymentsService
 }
 
+func (j *ProcessPaymentJob) GetType() string {
+	return "process-payment" 
+}
+
 func (j ProcessPaymentJob) Execute(data []byte) error {
 	var input ProcessPaymentInput
 	if err := json.Unmarshal(data, &input); err != nil {
@@ -23,5 +27,5 @@ func (j ProcessPaymentJob) Execute(data []byte) error {
 }
 
 func RegisterPaymentsJobs(paymentsService *PaymentsService) {
-	queue.RegisterJob(ProcessPayment, &ProcessPaymentJob{service: paymentsService})
+	queue.RegisterJob(&ProcessPaymentJob{service: paymentsService})
 }

@@ -2,6 +2,7 @@ package queue
 
 type Job interface {
 	Execute(data []byte) error
+	GetType() string
 }
 
 type JobRunner struct {
@@ -11,8 +12,8 @@ type JobRunner struct {
 
 var jobRegistry = map[string]Job{}
 
-func RegisterJob(typeName string, job Job) {
-	jobRegistry[typeName] = job
+func RegisterJob(job Job) {
+	jobRegistry[job.GetType()] = job
 }
 
 func GetJob(typeName string) (Job, bool) {

@@ -17,7 +17,6 @@ func ConnectPostgres() (*sql.DB, error) {
 		config.PostgresDatabaseUser,
 		config.PostgresDatabasePassword,
 	)
-
 	db, err := sql.Open("postgres", connectionString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database connection: %v", err)

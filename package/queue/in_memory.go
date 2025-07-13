@@ -30,6 +30,26 @@ func (q *InMemoryQueue) Enqueue(jobType string, payload any) error {
 	return nil
 }
 
+func (q *InMemoryQueue) enqueueRaw(jobType string, payload []byte) error {
+	job, ok := GetJob(jobType)
+	if !ok {
+		return fmt.Errorf("unknown job type: %s", jobType)
+	}
+
+	env := redisEnvelope{
+		Type: jobType,
+		Data: payload,
+	}
+
+	data, err := json.Marshal(env)
+	if err != nil {
+		return err
+	}
+
+	q.jobs <- JobRunner{Job: job, Data: data}
+	return nil
+}
+
 func (q *InMemoryQueue) GetJobs() <-chan JobRunner {
 	return q.jobs
 }

@@ -13,7 +13,6 @@ import (
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/health"
 )
 
-
 type PaymentsService struct {
 	db *sql.DB
 }
@@ -38,32 +37,37 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 	}
 
 	defaultProcessorHealth, err := health.CheckHealth(DefaultProcessor)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to check default processor health: %v", err)
 	}
 
 	fallbackProcessorHealth, err := health.CheckHealth(FallbackProcessor)
-
 	if err != nil {
 		return nil, fmt.Errorf("failed to check fallback processor health: %v", err)
 	}
 
+	client := &http.Client{Timeout: 10 * time.Second}
 	var resp *http.Response
 	var processedBy string
 
 	if !defaultProcessorHealth.Failing {
-		resp, err = http.Post(config.ProcessorDefaultURL+"/payments", "application/json", bytes.NewBuffer(payload))
+		resp, err = client.Post(config.ProcessorDefaultURL+"/payments", "application/json", bytes.NewBuffer(payload))
 		processedBy = DefaultProcessor
 	} else if !fallbackProcessorHealth.Failing {
-		resp, err = http.Post(config.ProcessorFallbackURL+"/payments", "application/json", bytes.NewBuffer(payload))
+		resp, err = client.Post(config.ProcessorFallbackURL+"/payments", "application/json", bytes.NewBuffer(payload))
 		processedBy = FallbackProcessor
 	} else {
-		return nil, fmt.Errorf("non of the processors are healthy try again latter")
+		return nil, fmt.Errorf("none of the processors are healthy; try again later")
 	}
 
-	if err != nil || resp.StatusCode >= 400 {
+	if err != nil {
 		return nil, fmt.Errorf("failed to process payment: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= http.StatusBadRequest {
+		health.SetAsFailing(processedBy)
+		return nil, fmt.Errorf("processor returned status %d", resp.StatusCode)
 	}
 
 	_, err = p.db.Exec(`
@@ -116,7 +120,7 @@ func (p *PaymentsService) SummarizePayments(input SummarizePaymentsInput) (*Summ
 
 func buildQuery(input SummarizePaymentsInput) (string, []any) {
 	var (
-		args      []any
+		args       []any
 		conditions []string
 	)
 

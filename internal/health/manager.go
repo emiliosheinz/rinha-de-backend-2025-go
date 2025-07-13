@@ -57,6 +57,7 @@ func (m *HealthManager) Start() {
 				m.runHealthCheck()
 			case <-database.RedisContext.Done():
 				ticker.Stop()
+				return
 			}
 		}
 	}()
@@ -78,9 +79,27 @@ func CheckHealth(name string) (*HealthResponse, error) {
 	return &healthResponse, nil
 }
 
+func SetAsFailing(name string) error {
+	health := &HealthResponse{Failing: true, MinResponseTime: 0}
+	value, err := json.Marshal(health)
+	if err != nil {
+		log.Printf("Error marshalling updated health status for %s: %v", name, err)
+		return err
+	}
+
+	if err := database.RedisClient.Set(database.RedisContext, getKey(name), value, 0).Err(); err != nil {
+		log.Printf("Error setting updated health status for %s: %v", name, err)
+		return err
+	}
+
+	log.Printf("Set failing status for %s to true", name)
+	return nil
+}
+
 func (m *HealthManager) runHealthCheck() {
+	client := &http.Client{Timeout: 1 * time.Second}
 	for name, url := range m.processors {
-		resp, err := http.Get(url)
+		resp, err := client.Get(url)
 		if err != nil {
 			log.Printf("Error checking health for %s: %v", name, err)
 			continue

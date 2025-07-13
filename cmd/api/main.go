@@ -14,16 +14,17 @@ import (
 func main() {
 	config.Init()
 	database.InitRedis()
+	defer database.RedisClient.Close()
 	db, err := database.ConnectPostgres()
-
-	health.NewHealthManager().Start()
-
 	if err != nil {
 		log.Fatalf("Failed to connect to the database: %v", err)
 	}
+	defer db.Close()
+
+	health.NewHealthManager().Start()
 
 	q := queue.NewRedisQueue(database.RedisClient, payments.PendingPaymentsQueueKey)
-	queue.StartWorkerPool(10, q)
+	queue.StartWorkerPool(8, q)
 	defer q.Close()
 
 	paymentsService := payments.NewPaymentsService(db)

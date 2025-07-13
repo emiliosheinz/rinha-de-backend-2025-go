@@ -4,7 +4,7 @@ import (
 	"context"
 
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/config"
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 var RedisClient *redis.Client

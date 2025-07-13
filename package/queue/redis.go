@@ -6,7 +6,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/go-redis/redis/v8"
+	"github.com/redis/go-redis/v9"
 )
 
 type redisEnvelope struct {
@@ -44,6 +44,20 @@ func (r *RedisQueue) Enqueue(jobType string, payload any) error {
 	}
 
 	data, err = json.Marshal(env)
+	if err != nil {
+		return err
+	}
+
+	return r.client.LPush(r.ctx, r.key, data).Err()
+}
+
+func (r *RedisQueue) enqueueRaw(jobType string, payload []byte) error {
+	env := redisEnvelope{
+		Type: jobType,
+		Data: payload,
+	}
+
+	data, err := json.Marshal(env)
 	if err != nil {
 		return err
 	}
