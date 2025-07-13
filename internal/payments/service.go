@@ -11,6 +11,11 @@ import (
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/config"
 )
 
+const (
+	DefaultProcessor = "default"
+	FallbackProcessor = "fallback"
+)
+
 type ProcessPaymentInput struct {
 	CorrelationID string  `json:"correlationId"`
 	Amount        float64 `json:"amount"`
@@ -43,16 +48,18 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 		return nil, fmt.Errorf("failed to marshal payload: %v", err)
 	}
 
-	processorURLs := []string{
-		config.ProcessorDefaultURL,
-		config.ProcessorFallbackURL,
+	processors := map[string]string{
+		DefaultProcessor: config.ProcessorDefaultURL,
+		FallbackProcessor: config.ProcessorFallbackURL,
 	}
 
 	var resp *http.Response
+	var processedBy string
 
-	for _, url := range processorURLs {
+	for name, url := range processors {
 		resp, err = http.Post(url+"/payments", "application/json", bytes.NewBuffer(payload))
 		if err == nil && resp.StatusCode < 400 {
+			processedBy = name
 			break
 		}
 	}
@@ -62,9 +69,9 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 	}
 
 	_, err = p.db.Exec(`
-		INSERT INTO payments (correlation_id, amount, processed_at)
-		VALUES ($1, $2, $3)
-	`, input.CorrelationID, input.Amount, requestedAt)
+		INSERT INTO payments (correlation_id, amount, processed_at, processed_by)
+		VALUES ($1, $2, $3, $4)
+	`, input.CorrelationID, input.Amount, requestedAt, processedBy)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert payment into DB: %v", err)

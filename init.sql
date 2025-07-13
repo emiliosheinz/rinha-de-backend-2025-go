@@ -7,6 +7,6 @@ CREATE TABLE payments (
   correlation_id VARCHAR(255) NOT NULL,
   amount DOUBLE PRECISION NOT NULL,
   processed_at TIMESTAMP NOT NULL,
-  processor processor NOT NULL
+  processed_by processor NOT NULL
 );
 
