@@ -2,7 +2,7 @@
 
 URL="http://localhost:9999/payments"
 
-for i in {1..3}; do
+for i in {1..10000}; do
   amount=$((RANDOM % 1000 + 1))
   user_id=$((RANDOM % 5 + 1))
   correlation_id=$(uuidgen)
@@ -13,4 +13,4 @@ for i in {1..3}; do
 done
 
 wait
-echo "✅ 1000 requisições enviadas para $URL com valores e correlationId aleatórios"
+echo "✅ Requisições enviadas para $URL com valores e correlationId aleatórios"

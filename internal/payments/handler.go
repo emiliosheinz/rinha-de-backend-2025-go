@@ -4,18 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/package/queue"
 )
 
 type PaymentsHandler struct {
-	jobsQueue queue.Queue
+	jobsQueue       queue.Queue
 	paymentsService *PaymentsService
 }
 
 func NewPaymentsHandler(q queue.Queue, ps *PaymentsService) *PaymentsHandler {
 	return &PaymentsHandler{
-		jobsQueue: q,
+		jobsQueue:       q,
 		paymentsService: ps,
 	}
 }
@@ -48,5 +49,51 @@ func (ph *PaymentsHandler) HandleGetSummary(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	fmt.Fprintf(w, "HandleGetSummary")
+
+	from, to, err := parseFilters(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	input := SummarizePaymentsInput{From: from, To: to}
+	summary, err := ph.paymentsService.SummarizePayments(input)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(summary); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+}
+
+func parseFilters(r *http.Request) (*time.Time, *time.Time, error) {
+	query := r.URL.Query()
+	fromStr := query.Get("from")
+	toStr := query.Get("to")
+
+	var from, to *time.Time
+	layout := time.RFC3339Nano
+
+	if fromStr != "" {
+		parsedFrom, err := time.Parse(layout, fromStr)
+		if err != nil {
+			return nil, nil, fmt.Errorf("invalid 'from' parameter format")
+		}
+		from = &parsedFrom
+	}
+
+	if toStr != "" {
+		parsedTo, err := time.Parse(layout, toStr)
+		if err != nil {
+			return nil, nil, fmt.Errorf("invalid 'to' parameter format")
+		}
+		to = &parsedTo
+	}
+
+	return from, to, nil
 }
