@@ -6,36 +6,40 @@ services:
       hostname: api01
       environment:
         - APP_PORT=8080
-        - PROCESSOR_DEFAULT_URL=http://payment-processor-default:8080
-        - PROCESSOR_FALLBACK_URL=http://payment-processor-fallback:8080
+        - PROCESSOR_DEFAULT_URL=${PROCESSOR_DEFAULT_URL}
+        - PROCESSOR_FALLBACK_URL=${PROCESSOR_FALLBACK_URL}
         - POSTGRES_DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
         - POSTGRES_DATABASE_PASSWORD=${DATABASE_PASSWORD}
         - POSTGRES_DATABASE_USER=${DATABASE_USER}
         - POSTGRES_DATABASE_NAME=${DATABASE_NAME}
-        - POSTGRES_DATABASE_PORT=5432
+        - POSTGRES_DATABASE_PORT=${DATABASE_PORT}
+        - REDIS_URL=${REDIS_URL}
       networks:
         - rinha
         - payment-processor
       depends_on:
-        - postgres-db
+            postgres:
+              condition: service_healthy
+            redis:
+              condition: service_healthy
       deploy:
         resources:
           limits:
             cpus: "0.25"
-            memory: "100MB"
+            memory: "25MB"
   api02:
       <<: *api
       hostname: api02
       environment:
         - APP_PORT=8080
-        - PROCESSOR_DEFAULT_URL=http://payment-processor-default:8080
-        - PROCESSOR_FALLBACK_URL=http://payment-processor-fallback:8080
+        - PROCESSOR_DEFAULT_URL=${PROCESSOR_DEFAULT_URL}
+        - PROCESSOR_FALLBACK_URL=${PROCESSOR_FALLBACK_URL}
         - POSTGRES_DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
         - POSTGRES_DATABASE_PASSWORD=${DATABASE_PASSWORD}
         - POSTGRES_DATABASE_USER=${DATABASE_USER}
         - POSTGRES_DATABASE_NAME=${DATABASE_NAME}
-        - POSTGRES_DATABASE_PORT=5432
-
+        - POSTGRES_DATABASE_PORT=${DATABASE_PORT}
+        - REDIS_URL=${REDIS_URL}
   nginx:
       image: nginx:1.25-alpine
       volumes:
@@ -55,7 +59,7 @@ services:
             cpus: '0.1'
             memory: '30MB'
 
-  postgres-db:
+  postgres:
       image: postgres:17-alpine
       restart: always
       hostname: ${DATABASE_HOSTNAME}
@@ -67,15 +71,33 @@ services:
         - ./init.sql:/docker-entrypoint-initdb.d/script.sql
       networks:
         - rinha
-        - payment-processor
+      healthcheck:
+            test: ["CMD-SHELL", "pg_isready -U postgres"]
+            interval: 2s
+            timeout: 2s
+            retries: 10
       deploy:
         resources:
           limits:
-            cpus: '0.9'
-            memory: '120MB'
+            cpus: '0.8'
+            memory: '135MB'
 
-volumes:
-  postgres_data:
+  redis:
+    image: redis:8-alpine
+    restart: always
+    hostname: redis
+    networks:
+      - rinha
+    healthcheck:
+          test: ["CMD", "redis-cli", "ping"]
+          interval: 2s
+          timeout: 2s
+          retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: '135MB'
 
 networks:
   payment-processor:

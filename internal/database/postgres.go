@@ -8,7 +8,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-func Connect() (*sql.DB, error) {
+func ConnectPostgres() (*sql.DB, error) {
 	connectionString := fmt.Sprintf(
 		"host=%s port=%s dbname=%s user=%s password=%s sslmode=disable",
 		config.PostgresDatabaseHostname,

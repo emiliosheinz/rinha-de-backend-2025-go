@@ -6,13 +6,14 @@ import (
 )
 
 var (
-	ProcessorDefaultURL  string
-	ProcessorFallbackURL string
+	ProcessorDefaultURL      string
+	ProcessorFallbackURL     string
 	PostgresDatabaseHostname string
 	PostgresDatabasePort     string
 	PostgresDatabaseName     string
 	PostgresDatabaseUser     string
 	PostgresDatabasePassword string
+	RedisURL                 string
 )
 
 func Init() {
@@ -51,6 +52,10 @@ func Init() {
 		log.Fatal("POSTGRES_DATABASE_PASSWORD is not set")
 	}
 
+	RedisURL = os.Getenv("REDIS_URL")
+	if RedisURL == "" {
+		log.Fatal("REDIS_URL is not set")
+	}
+
 	log.Println("Configuration initialized successfully")
 }
-

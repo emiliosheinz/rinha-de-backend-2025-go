@@ -1,8 +1,7 @@
 package queue
 
 type Queue interface {
-	Enqueue(job Job)
-	GetJobs() <-chan Job
+	Enqueue(jobType string, payload any) error
+	GetJobs() <-chan JobRunner
 	Close()
 }
-

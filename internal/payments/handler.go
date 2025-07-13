@@ -35,12 +35,7 @@ func (ph *PaymentsHandler) HandleCreatePayment(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	job := &ProcessPaymentJob{
-		payment: input,
-		service: ph.paymentsService,
-	}
-	ph.jobsQueue.Enqueue(job)
-
+	ph.jobsQueue.Enqueue(ProcessPayment, input)
 	w.WriteHeader(http.StatusAccepted)
 }
 

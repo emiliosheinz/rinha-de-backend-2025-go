@@ -10,12 +10,9 @@ import (
 	"time"
 
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/config"
+	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/health"
 )
 
-const (
-	DefaultProcessor  = "default"
-	FallbackProcessor = "fallback"
-)
 
 type PaymentsService struct {
 	db *sql.DB
@@ -43,20 +40,29 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 		return nil, fmt.Errorf("failed to marshal payload: %v", err)
 	}
 
-	processors := map[string]string{
-		DefaultProcessor:  config.ProcessorDefaultURL,
-		FallbackProcessor: config.ProcessorFallbackURL,
+	defaultProcessorHealth, err := health.CheckHealth(DefaultProcessor)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to check default processor health: %v", err)
+	}
+
+	fallbackProcessorHealth, err := health.CheckHealth(FallbackProcessor)
+
+	if err != nil {
+		return nil, fmt.Errorf("failed to check fallback processor health: %v", err)
 	}
 
 	var resp *http.Response
 	var processedBy string
 
-	for name, url := range processors {
-		resp, err = http.Post(url+"/payments", "application/json", bytes.NewBuffer(payload))
-		if err == nil && resp.StatusCode < 400 {
-			processedBy = name
-			break
-		}
+	if !defaultProcessorHealth.Failing {
+		resp, err = http.Post(config.ProcessorDefaultURL+"/payments", "application/json", bytes.NewBuffer(payload))
+		processedBy = DefaultProcessor
+	} else if !fallbackProcessorHealth.Failing {
+		resp, err = http.Post(config.ProcessorFallbackURL+"/payments", "application/json", bytes.NewBuffer(payload))
+		processedBy = FallbackProcessor
+	} else {
+		return nil, fmt.Errorf("non of the processors are healthy try again latter")
 	}
 
 	if err != nil || resp.StatusCode >= 400 {

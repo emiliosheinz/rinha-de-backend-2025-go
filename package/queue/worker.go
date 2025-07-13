@@ -7,33 +7,40 @@ import (
 
 type Worker struct {
 	id   int
-	jobs <-chan Job
+	jobs <-chan JobRunner
 	wg   *sync.WaitGroup
 }
 
-func NewWorker(id int, jobs <-chan Job, wg *sync.WaitGroup) *Worker {
+func NewWorker(id int, jobs <-chan JobRunner, wg *sync.WaitGroup) *Worker {
 	return &Worker{id: id, jobs: jobs, wg: wg}
 }
 
-func NewWorkerPool(num int, jobs <-chan Job, wg *sync.WaitGroup) []*Worker {
-	workers := make([]*Worker, num)
-	for i := range num {
-		wg.Add(1)
-		worker := NewWorker(i, jobs, wg)
-		workers[i] =  worker
-		worker.Start()	
-	}
-	return workers
-}
-
-func (w Worker) Start() {
+func (w *Worker) Start() {
 	go func() {
 		defer w.wg.Done()
-		for job := range w.jobs {
-			if err := job.Execute(); err != nil {
-				// What if both tries fail, the job will fail, we need to handle that
-				log.Printf("worker %d: job error: %v", w.id, err)
+		for runner := range w.jobs {
+			if err := runner.Job.Execute(runner.Data); err != nil {
+				log.Printf("worker %d: job failed: %v", w.id, err)
 			}
 		}
 	}()
+}
+
+func StartWorkerPool(n int, queue Queue) []*Worker {
+	var wg sync.WaitGroup
+	workers := make([]*Worker, n)
+	jobs := queue.GetJobs()
+
+	for i := range n {
+		wg.Add(1)
+		worker := NewWorker(i, jobs, &wg)
+		workers[i] = worker
+		worker.Start()
+	}
+
+	go func() {
+		wg.Wait()
+	}()
+
+	return workers
 }
