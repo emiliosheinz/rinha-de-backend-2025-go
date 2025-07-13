@@ -20,16 +20,22 @@ type HealthResponse struct {
 type HealthManager struct {
 	lockKey    string
 	instanceID string
+	processors map[string]string
 }
 
 func NewHealthManager() *HealthManager {
 	return &HealthManager{
 		instanceID: uuid.NewString(),
 		lockKey:    "health-manager-leader",
+		processors: map[string]string{
+			"default":  config.ProcessorDefaultURL + "/payments/service-health",
+			"fallback": config.ProcessorFallbackURL + "/payments/service-health",
+		},
 	}
 }
 
 func (m *HealthManager) Start() {
+
 	isLeader, err := m.tryToBecomeLeader()
 	if err != nil {
 		log.Printf("Error trying to become leader: %v", err)
@@ -73,16 +79,13 @@ func CheckHealth(name string) (*HealthResponse, error) {
 }
 
 func (m *HealthManager) runHealthCheck() {
-	processors := map[string]string{
-		"default":  config.ProcessorDefaultURL + "/payments/service-health",
-		"fallback": config.ProcessorFallbackURL + "/payments/service-health",
-	}
-	for name, url := range processors {
+	for name, url := range m.processors {
 		resp, err := http.Get(url)
 		if err != nil {
 			log.Printf("Error checking health for %s: %v", name, err)
 			continue
 		}
+		defer resp.Body.Close()
 		if resp.StatusCode != http.StatusOK {
 			log.Printf("Health check for %s failed with status code: %d", name, resp.StatusCode)
 			continue
@@ -92,7 +95,6 @@ func (m *HealthManager) runHealthCheck() {
 			log.Printf("Error decoding health response for %s: %v", name, err)
 			continue
 		}
-		resp.Body.Close()
 		value, err := json.Marshal(healthResponse)
 		if err != nil {
 			log.Printf("Error marshalling health response for %s: %v", name, err)

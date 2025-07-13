@@ -25,8 +25,8 @@ services:
       deploy:
         resources:
           limits:
-            cpus: "0.25"
-            memory: "25MB"
+            cpus: "0.5"
+            memory: "30MB"
   api02:
       <<: *api
       hostname: api02
@@ -57,7 +57,7 @@ services:
         resources:
           limits:
             cpus: '0.1'
-            memory: '30MB'
+            memory: '15MB'
 
   postgres:
       image: postgres:17-alpine
@@ -79,8 +79,8 @@ services:
       deploy:
         resources:
           limits:
-            cpus: '0.8'
-            memory: '135MB'
+            cpus: '0.3'
+            memory: '150MB'
 
   redis:
     image: redis:8-alpine
@@ -97,7 +97,7 @@ services:
       resources:
         limits:
           cpus: '0.1'
-          memory: '135MB'
+          memory: '125MB'
 
 networks:
   payment-processor:

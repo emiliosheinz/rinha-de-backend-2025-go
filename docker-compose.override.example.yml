@@ -13,3 +13,7 @@ services:
           memory: "500MB"
   api02:
     <<: *api
+
+  postgres:
+    ports:
+      - "5432:5432"

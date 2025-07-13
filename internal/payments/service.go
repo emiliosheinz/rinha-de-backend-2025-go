@@ -24,9 +24,6 @@ func NewPaymentsService(db *sql.DB) *PaymentsService {
 	}
 }
 
-// Payment processment still needs to be improved so that it takes into consideration the
-// payment processors health and not simply tries the default and then the fallsback.
-// additionally, we should add a retry mechanism to the queue so that each job is retried a few times
 func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPaymentOutput, error) {
 	requestedAt := time.Now().UTC()
 	payloadMap := map[string]any{
