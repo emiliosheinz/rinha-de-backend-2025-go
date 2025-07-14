@@ -24,7 +24,7 @@ func main() {
 	health.NewHealthManager().Start()
 
 	q := queue.NewRedisQueue(database.RedisClient, payments.PendingPaymentsQueueKey)
-	queue.StartWorkerPool(8, q)
+	queue.StartWorkerPool(16, q)
 	defer q.Close()
 
 	paymentsService := payments.NewPaymentsService(db)

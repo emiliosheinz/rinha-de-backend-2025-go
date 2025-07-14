@@ -97,7 +97,7 @@ func SetAsFailing(name string) error {
 }
 
 func (m *HealthManager) runHealthCheck() {
-	client := &http.Client{Timeout: 1 * time.Second}
+	client := &http.Client{Timeout: 4 * time.Second}
 	for name, url := range m.processors {
 		resp, err := client.Get(url)
 		if err != nil {

@@ -35,7 +35,9 @@ func (ph *PaymentsHandler) HandleCreatePayment(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	ph.jobsQueue.Enqueue(ProcessPayment, input)
+	go func() {
+		ph.jobsQueue.Enqueue(ProcessPayment, input)
+	}()
 	w.WriteHeader(http.StatusAccepted)
 }
 

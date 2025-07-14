@@ -50,15 +50,13 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 	var resp *http.Response
 	var processedBy string
 
-	if !defaultProcessorHealth.Failing {
-		resp, err = client.Post(config.ProcessorDefaultURL+"/payments", "application/json", bytes.NewBuffer(payload))
-		processedBy = DefaultProcessor
-	} else if !fallbackProcessorHealth.Failing {
+	if defaultProcessorHealth.Failing || defaultProcessorHealth.MinResponseTime > fallbackProcessorHealth.MinResponseTime {
 		resp, err = client.Post(config.ProcessorFallbackURL+"/payments", "application/json", bytes.NewBuffer(payload))
 		processedBy = FallbackProcessor
 	} else {
-		return nil, fmt.Errorf("none of the processors are healthy; try again later")
-	}
+		resp, err = client.Post(config.ProcessorDefaultURL+"/payments", "application/json", bytes.NewBuffer(payload))
+		processedBy = DefaultProcessor
+	} 
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to process payment: %v", err)
@@ -79,7 +77,6 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 		return nil, fmt.Errorf("failed to insert payment into DB: %v", err)
 	}
 
-	fmt.Print("Payment processed successfully\n")
 	return &ProcessPaymentOutput{}, nil
 }
 
