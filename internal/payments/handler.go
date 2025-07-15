@@ -35,13 +35,15 @@ func (ph *PaymentsHandler) HandleCreatePayment(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	task, err := NewPaymentProcessingTask(input)
-	if err != nil {
-		fmt.Fprintf(w, "Error decoding request body: %v\n", err)
-		w.WriteHeader(http.StatusInternalServerError)
-		return
-	}
-	ph.queue.Enqueue(task)
+	go func() {
+		task, err := NewPaymentProcessingTask(input)
+		if err != nil {
+			fmt.Fprintf(w, "Error decoding request body: %v\n", err)
+			return
+		}
+		ph.queue.Enqueue(task)
+
+	}()
 	w.WriteHeader(http.StatusAccepted)
 }
 
