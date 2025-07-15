@@ -28,7 +28,7 @@ func ConnectPostgres() (*sql.DB, error) {
 	}
 		
 	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(10)
+	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(0)
 
 	fmt.Println("Database connection established successfully")

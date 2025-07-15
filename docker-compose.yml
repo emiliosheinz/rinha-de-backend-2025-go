@@ -94,7 +94,9 @@ services:
     image: redis:8-alpine
     restart: always
     hostname: redis
-    command: redis-server --save "" --appendonly no --maxclients 20000
+    command: >
+      redis-server --save "" --appendonly no --maxclients 65535
+                  --maxmemory-policy allkeys-lru --hz 100 --tcp-backlog 511 --timeout 0
     networks:
       - rinha
     healthcheck:

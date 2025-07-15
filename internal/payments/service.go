@@ -46,17 +46,19 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 		return nil, fmt.Errorf("failed to check fallback processor health: %v", err)
 	}
 
+	var processor string
+	var processorURL string
 	client := &http.Client{Timeout: 10 * time.Second}
-	var resp *http.Response
-	var processedBy string
 
-	if defaultProcessorHealth.Failing || defaultProcessorHealth.MinResponseTime > fallbackProcessorHealth.MinResponseTime {
-		resp, err = client.Post(config.ProcessorFallbackURL+"/payments", "application/json", bytes.NewBuffer(payload))
-		processedBy = FallbackProcessor
+	if shouldUseFallbackProcessor(defaultProcessorHealth, fallbackProcessorHealth) {
+		processor = FallbackProcessor
+		processorURL = config.ProcessorFallbackURL
 	} else {
-		resp, err = client.Post(config.ProcessorDefaultURL+"/payments", "application/json", bytes.NewBuffer(payload))
-		processedBy = DefaultProcessor
-	} 
+		processor = DefaultProcessor
+		processorURL = config.ProcessorDefaultURL
+	}
+
+	resp, err := client.Post(processorURL+"/payments", "application/json", bytes.NewBuffer(payload))
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to process payment: %v", err)
@@ -64,14 +66,14 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		health.SetAsFailing(processedBy)
+		health.SetAsFailing(processor)
 		return nil, fmt.Errorf("processor returned status %d", resp.StatusCode)
 	}
 
 	_, err = p.db.Exec(`
 		INSERT INTO payments (correlation_id, amount, processed_at, processed_by)
 		VALUES ($1, $2, $3, $4)
-	`, input.CorrelationID, input.Amount, requestedAt, processedBy)
+	`, input.CorrelationID, input.Amount, requestedAt, processor)
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert payment into DB: %v", err)
@@ -145,4 +147,16 @@ func buildQuery(input SummarizePaymentsInput) (string, []any) {
 	query.WriteString(" GROUP BY processed_by")
 
 	return query.String(), args
+}
+
+func shouldUseFallbackProcessor(defaultHealth, fallbackHealth *health.HealthResponse) bool {
+	if defaultHealth.Failing {
+		return true
+	}
+
+	if fallbackHealth.Failing {
+		return false
+	}
+
+	return float64(defaultHealth.MinResponseTime) > 1.25*float64(fallbackHealth.MinResponseTime)
 }

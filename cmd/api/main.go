@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/config"
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/database"
@@ -42,6 +43,10 @@ func startQueueWorkersServer(paymentsService *payments.PaymentsService) {
 		database.RedisClient,
 		asynq.Config{
 			Concurrency: 16,
+			DelayedTaskCheckInterval: time.Duration(1) * time.Second,
+			RetryDelayFunc: func(n int, e error, t *asynq.Task) time.Duration {
+				return time.Duration(3) * time.Second
+			},
 		},
 	)
 
