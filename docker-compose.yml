@@ -2,16 +2,6 @@ services:
   api01: &api
       image: ghcr.io/emiliosheinz/rinha-de-backend-2025-go:latest
       hostname: api01
-      environment:
-        - APP_PORT=8080
-        - PROCESSOR_DEFAULT_URL=${PROCESSOR_DEFAULT_URL}
-        - PROCESSOR_FALLBACK_URL=${PROCESSOR_FALLBACK_URL}
-        - POSTGRES_DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
-        - POSTGRES_DATABASE_PASSWORD=${DATABASE_PASSWORD}
-        - POSTGRES_DATABASE_USER=${DATABASE_USER}
-        - POSTGRES_DATABASE_NAME=${DATABASE_NAME}
-        - POSTGRES_DATABASE_PORT=${DATABASE_PORT}
-        - REDIS_URL=${REDIS_URL}
       networks:
         - rinha
         - payment-processor
@@ -32,16 +22,7 @@ services:
   api02:
       <<: *api
       hostname: api02
-      environment:
-        - APP_PORT=8080
-        - PROCESSOR_DEFAULT_URL=${PROCESSOR_DEFAULT_URL}
-        - PROCESSOR_FALLBACK_URL=${PROCESSOR_FALLBACK_URL}
-        - POSTGRES_DATABASE_HOSTNAME=${DATABASE_HOSTNAME}
-        - POSTGRES_DATABASE_PASSWORD=${DATABASE_PASSWORD}
-        - POSTGRES_DATABASE_USER=${DATABASE_USER}
-        - POSTGRES_DATABASE_NAME=${DATABASE_NAME}
-        - POSTGRES_DATABASE_PORT=${DATABASE_PORT}
-        - REDIS_URL=${REDIS_URL}
+
   nginx:
       image: nginx:1.25-alpine
       volumes:

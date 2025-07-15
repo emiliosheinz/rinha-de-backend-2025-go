@@ -17,15 +17,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up .env file from secrets
-        run: |
-          echo "PROCESSOR_DEFAULT_URL=${{ vars.PROCESSOR_DEFAULT_URL }}" >> .env
-          echo "PROCESSOR_FALLBACK_URL=${{ vars.PROCESSOR_FALLBACK_URL }}" >> .env
-          echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
-          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
-          echo "DATABASE_NAME=${{ vars.DATABASE_NAME }}" >> .env
-          echo "DATABASE_HOSTNAME=${{ vars.DATABASE_HOSTNAME }}" >> .env
-          echo "DATABASE_PORT=${{ vars.DATABASE_PORT }}" >> .env
-          echo "REDIS_URL=${{ vars.REDIS_URL }}" >> .env
+        run: cp .env.example .env
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3

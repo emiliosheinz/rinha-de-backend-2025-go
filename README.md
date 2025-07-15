@@ -81,4 +81,4 @@ Execute the official test suite to validate the implementation by running:
 ```
 
 ## Conclusion
-This implementation tried to balances performance and resilience by combining asynchronous task processing, dynamic health-aware routing, and leader election to meet the challenge's scoring criteria for profit maximization and latency targets. The main idea behind it all was to implement something that could be used in a real-world scenario and not just a hacky solution to pass the tests.
+This implementation tried to balances performance and resilience by combining asynchronous task processing and dynamic health-aware routing to meet the challenge's scoring criteria for profit maximization and latency targets. The main idea behind it all was to implement something that could be used in a real-world scenario and not just a hacky solution to pass the tests.
