@@ -34,6 +34,7 @@ func main() {
 
 	http.HandleFunc("/payments", paymentsHandler.HandleCreatePayment)
 	http.HandleFunc("/payments-summary", paymentsHandler.HandleGetSummary)
+	http.HandleFunc("/purge-payments", paymentsHandler.HandlePurgePayments)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

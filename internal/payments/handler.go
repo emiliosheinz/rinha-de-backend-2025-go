@@ -100,3 +100,19 @@ func parseFilters(r *http.Request) (*time.Time, *time.Time, error) {
 
 	return from, to, nil
 }
+
+func (ph *PaymentsHandler) HandlePurgePayments(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	err := ph.paymentsService.PurgePayments()
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error purging payments: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, "Payments purged successfully")
+}

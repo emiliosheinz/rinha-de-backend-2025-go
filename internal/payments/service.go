@@ -160,3 +160,11 @@ func shouldUseFallbackProcessor(defaultHealth, fallbackHealth *health.HealthResp
 
 	return float64(defaultHealth.MinResponseTime) > 1.25*float64(fallbackHealth.MinResponseTime)
 }
+
+func (p *PaymentsService) PurgePayments() error {
+	_, err := p.db.Exec("DELETE FROM payments")
+	if err != nil {
+		return fmt.Errorf("failed to purge payments: %v", err)
+	}
+	return nil
+}
