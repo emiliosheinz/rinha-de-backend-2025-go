@@ -19,7 +19,7 @@ func NewPaymentProcessingTask(input *ProcessPaymentInput) (*asynq.Task, error) {
 	return asynq.NewTask(TypePaymentProcessing, payload), nil
 }
 
-type PaymentProcessor struct { 
+type PaymentProcessor struct {
 	paymentsService *PaymentsService
 }
 
@@ -34,7 +34,6 @@ func (processor *PaymentProcessor) ProcessTask(ctx context.Context, t *asynq.Tas
 	if err := json.Unmarshal(t.Payload(), &input); err != nil {
 		return fmt.Errorf("json.Unmarshal failed: %v: %w", err, asynq.SkipRetry)
 	}
-	_, err := 	processor.paymentsService.ProcessPayment(input)
-	return err 
+	_, err := processor.paymentsService.ProcessPayment(input)
+	return err
 }
-

@@ -17,3 +17,18 @@ services:
   postgres:
     ports:
       - "5432:5432"
+
+  asynqmon:
+    image: hibiken/asynqmon
+    platform: linux/amd64
+    container_name: asynqmon
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - rinha
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      - REDIS_ADDR=${REDIS_URL}
