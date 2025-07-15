@@ -1,0 +1,51 @@
+name: 🐳 Build and push Docker image
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push-docker-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .env file from secrets
+        run: |
+          echo "PROCESSOR_DEFAULT_URL=${{ vars.PROCESSOR_DEFAULT_URL }}" >> .env
+          echo "PROCESSOR_FALLBACK_URL=${{ vars.PROCESSOR_FALLBACK_URL }}" >> .env
+          echo "DATABASE_USER=${{ secrets.DATABASE_USER }}" >> .env
+          echo "DATABASE_PASSWORD=${{ secrets.DATABASE_PASSWORD }}" >> .env
+          echo "DATABASE_NAME=${{ vars.DATABASE_NAME }}" >> .env
+          echo "DATABASE_HOSTNAME=${{ vars.DATABASE_HOSTNAME }}" >> .env
+          echo "DATABASE_PORT=${{ vars.DATABASE_PORT }}" >> .env
+          echo "REDIS_URL=${{ vars.REDIS_URL }}" >> .env
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker images
+        uses: docker/build-push-action@v5.1.0
+        with:
+          context: .
+          push: true
+          file: ./Dockerfile
+          target: prod
+          platforms: linux/amd64,linux/arm64
+          tags: ghcr.io/emiliosheinz/rinha-de-backend-2025-go:latest

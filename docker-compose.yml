@@ -1,8 +1,6 @@
 services:
   api01: &api
-      build:
-        context: .
-        target: prod
+      image: ghcr.io/emiliosheinz/rinha-de-backend-2025-go:latest
       hostname: api01
       environment:
         - APP_PORT=8080
