@@ -39,7 +39,11 @@ services:
       - 8001:8080
     depends_on:
       - payment-processor-db-1
-    
+    ulimits:
+          nofile:
+            soft: 65535
+            hard: 65535
+
   payment-processor-db-1:
     <<: *payment-processor-db
     container_name: payment-processor-default-db

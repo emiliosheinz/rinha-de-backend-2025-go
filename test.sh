@@ -5,4 +5,4 @@ docker compose up -d --build --force-recreate
 
 sleep 3
 
-K6_WEB_DASHBOARD_PERIOD=1s K6_WEB_DASHBOARD=true K6_WEB_DASHBOARD_OPEN=true k6 run ./rinha-test/rinha.js
+docker run --rm -i --network host -v $(pwd)/rinha-test:/scripts grafana/k6 run /scripts/rinha.js

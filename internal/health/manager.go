@@ -35,7 +35,6 @@ func NewHealthManager() *HealthManager {
 }
 
 func (m *HealthManager) Start() {
-
 	isLeader, err := m.tryToBecomeLeader()
 	if err != nil {
 		log.Printf("Error trying to become leader: %v", err)

@@ -6,17 +6,17 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/emiliosheinz/rinha-de-backend-2025-go/package/queue"
+	"github.com/hibiken/asynq"
 )
 
 type PaymentsHandler struct {
-	jobsQueue       queue.Queue
+	queue           *asynq.Client
 	paymentsService *PaymentsService
 }
 
-func NewPaymentsHandler(q queue.Queue, ps *PaymentsService) *PaymentsHandler {
+func NewPaymentsHandler(queue *asynq.Client, ps *PaymentsService) *PaymentsHandler {
 	return &PaymentsHandler{
-		jobsQueue:       q,
+		queue:           queue,
 		paymentsService: ps,
 	}
 }
@@ -27,7 +27,7 @@ func (ph *PaymentsHandler) HandleCreatePayment(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var input ProcessPaymentInput
+	var input *ProcessPaymentInput
 	err := json.NewDecoder(r.Body).Decode(&input)
 	if err != nil {
 		fmt.Fprintf(w, "Error decoding request body: %v\n", err)
@@ -35,9 +35,13 @@ func (ph *PaymentsHandler) HandleCreatePayment(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	go func() {
-		ph.jobsQueue.Enqueue(ProcessPayment, input)
-	}()
+	task, err := NewPaymentProcessingTask(input)
+	if err != nil {
+		fmt.Fprintf(w, "Error decoding request body: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	ph.queue.Enqueue(task)
 	w.WriteHeader(http.StatusAccepted)
 }
 

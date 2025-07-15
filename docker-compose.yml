@@ -27,6 +27,10 @@ services:
           limits:
             cpus: "0.5"
             memory: "30MB"
+      ulimits:
+            nofile:
+              soft: 65535
+              hard: 65535
   api02:
       <<: *api
       hostname: api02
@@ -58,6 +62,10 @@ services:
           limits:
             cpus: '0.2'
             memory: '15MB'
+      ulimits:
+            nofile:
+              soft: 65535
+              hard: 65535
 
   postgres:
       image: postgres:17-alpine
@@ -86,6 +94,7 @@ services:
     image: redis:8-alpine
     restart: always
     hostname: redis
+    command: redis-server --save "" --appendonly no --maxclients 20000
     networks:
       - rinha
     healthcheck:
