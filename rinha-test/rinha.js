@@ -1,5 +1,5 @@
-import { textSummary } from 'https://jslib.k6.io/k6-summary/0.1.0/index.js';
-import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
+import { textSummary } from './k6-summary.js';
+import { uuidv4 } from "./k6-utils.js";
 import { sleep } from "k6";
 import exec from "k6/execution";
 import { Counter } from "k6/metrics";
