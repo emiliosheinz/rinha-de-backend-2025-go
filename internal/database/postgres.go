@@ -26,7 +26,7 @@ func ConnectPostgres() (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to ping database: %v", err)
 	}
-		
+
 	db.SetMaxOpenConns(100)
 	db.SetMaxIdleConns(25)
 	db.SetConnMaxLifetime(0)

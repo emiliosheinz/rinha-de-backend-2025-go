@@ -4,7 +4,7 @@ import "time"
 
 type ProcessPaymentInput struct {
 	CorrelationID string  `json:"correlationId"`
-	Amount        float64 `json:"amount"`
+	Amount        Decimal `json:"amount"`
 }
 
 type ProcessPaymentOutput struct{}
@@ -16,7 +16,7 @@ type SummarizePaymentsInput struct {
 
 type Summary struct {
 	TotalRequests int     `json:"totalRequests"`
-	TotalAmount   float64 `json:"totalAmount"`
+	TotalAmount   Decimal `json:"totalAmount"`
 }
 
 type SummarizePaymentsOutput struct {

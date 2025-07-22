@@ -18,11 +18,11 @@ type HealthResponse struct {
 }
 
 type HealthManager struct {
-	lockKey        string
-	instanceID     string
-	processors     map[string]string
-	healthTicker   *time.Ticker
-	stopHealth     chan struct{}
+	lockKey         string
+	instanceID      string
+	processors      map[string]string
+	healthTicker    *time.Ticker
+	stopHealth      chan struct{}
 	healthStartOnce sync.Once
 }
 

@@ -15,7 +15,7 @@ import {
   requestBackendPayment
 } from "./requests.js";
 
-const MAX_REQUESTS = __ENV.MAX_REQUESTS ?? 500;
+const MAX_REQUESTS = __ENV.MAX_REQUESTS ?? 550;
 
 export const options = {
   summaryTrendStats: [

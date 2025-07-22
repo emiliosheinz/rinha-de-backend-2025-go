@@ -14,10 +14,10 @@ var RedisContext = context.Background()
 func InitRedis() {
 	options := &redis.Options{
 		Addr:         config.RedisURL,
-		PoolSize:     100,            
-		MinIdleConns: 25,             
-		ReadTimeout:  100 * time.Millisecond, 
-		WriteTimeout: 100 * time.Millisecond, 
+		PoolSize:     100,
+		MinIdleConns: 25,
+		ReadTimeout:  100 * time.Millisecond,
+		WriteTimeout: 100 * time.Millisecond,
 	}
 	RedisClient = redis.NewClient(options)
 }

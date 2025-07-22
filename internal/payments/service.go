@@ -27,7 +27,7 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 	requestedAt := time.Now().UTC()
 	payloadMap := map[string]any{
 		"correlationId": input.CorrelationID,
-		"amount":        input.Amount,
+		"amount":        json.Number(input.Amount.String()),
 		"requestedAt":   requestedAt.Format(time.RFC3339Nano),
 	}
 
@@ -98,7 +98,7 @@ func (p *PaymentsService) SummarizePayments(input SummarizePaymentsInput) (*Summ
 	for rows.Next() {
 		var processor string
 		var totalRequests int
-		var totalAmount float64
+		var totalAmount Decimal
 
 		if err := rows.Scan(&processor, &totalRequests, &totalAmount); err != nil {
 			return nil, fmt.Errorf("failed to scan row: %v", err)

@@ -43,7 +43,7 @@ func startQueueWorkersServer(paymentsService *payments.PaymentsService) {
 	srv := asynq.NewServerFromRedisClient(
 		database.RedisClient,
 		asynq.Config{
-			Concurrency: 32,
+			Concurrency:              32,
 			DelayedTaskCheckInterval: time.Duration(1) * time.Second,
 			RetryDelayFunc: func(n int, e error, t *asynq.Task) time.Duration {
 				return time.Duration(3) * time.Second
