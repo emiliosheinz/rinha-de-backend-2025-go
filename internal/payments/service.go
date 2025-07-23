@@ -14,12 +14,24 @@ import (
 )
 
 type PaymentsService struct {
-	db *sql.DB
+	db         *sql.DB
+	httpClient *http.Client
 }
 
 func NewPaymentsService(db *sql.DB) *PaymentsService {
+	transport := &http.Transport{
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 50,
+		IdleConnTimeout:     90 * time.Second,
+		DisableCompression:  true,
+	}
+
 	return &PaymentsService{
 		db: db,
+		httpClient: &http.Client{
+			Timeout:   5 * time.Second,
+			Transport: transport,
+		},
 	}
 }
 
@@ -48,7 +60,6 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 
 	var processor string
 	var processorURL string
-	client := &http.Client{Timeout: 10 * time.Second}
 
 	if shouldUseFallbackProcessor(defaultProcessorHealth, fallbackProcessorHealth) {
 		processor = FallbackProcessor
@@ -58,7 +69,7 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 		processorURL = config.ProcessorDefaultURL
 	}
 
-	resp, err := client.Post(processorURL+"/payments", "application/json", bytes.NewBuffer(payload))
+	resp, err := p.httpClient.Post(processorURL+"/payments", "application/json", bytes.NewBuffer(payload))
 
 	if err != nil {
 		return nil, fmt.Errorf("failed to process payment: %v", err)

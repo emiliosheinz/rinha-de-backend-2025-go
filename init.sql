@@ -10,3 +10,8 @@ CREATE TABLE payments (
   processed_by processor NOT NULL
 );
 
+-- Performance indexes
+CREATE INDEX idx_payments_processed_at ON payments(processed_at);
+CREATE INDEX idx_payments_processed_by ON payments(processed_by);
+CREATE INDEX idx_payments_processed_at_by ON payments(processed_at, processed_by);
+
