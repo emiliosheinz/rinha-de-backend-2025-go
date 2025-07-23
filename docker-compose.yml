@@ -78,7 +78,7 @@ services:
         resources:
           limits:
             cpus: '0.2'
-            memory: '150MB'
+            memory: '200MB'
 
   redis:
     image: redis:8-alpine
@@ -98,7 +98,7 @@ services:
       resources:
         limits:
           cpus: '0.1'
-          memory: '125MB'
+          memory: '75MB'
 
 networks:
   payment-processor:
