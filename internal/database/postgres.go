@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/config"
 	_ "github.com/lib/pq"
@@ -27,9 +28,9 @@ func ConnectPostgres() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %v", err)
 	}
 
-	db.SetMaxOpenConns(100)
-	db.SetMaxIdleConns(25)
-	db.SetConnMaxLifetime(0)
+	db.SetMaxOpenConns(64)
+	db.SetMaxIdleConns(32)
+	db.SetConnMaxLifetime(30 * time.Second)
 
 	fmt.Println("Database connection established successfully")
 	return db, nil
