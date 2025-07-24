@@ -3,7 +3,7 @@ name: 🐳 Build and push Docker image
 on:
   push:
     tags:
-      - '*'
+      - '**'
 
 permissions:
   contents: read
