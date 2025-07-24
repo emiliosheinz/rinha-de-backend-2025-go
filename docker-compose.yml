@@ -60,7 +60,7 @@ services:
       image: postgres:17-alpine
       restart: always
       hostname: ${DATABASE_HOSTNAME}
-      command: postgres -c max_connections=256
+      command: postgres -c max_connections=512
       environment:
         - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
         - POSTGRES_USER=${DATABASE_USER}

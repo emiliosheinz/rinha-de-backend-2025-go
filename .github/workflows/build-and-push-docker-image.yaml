@@ -1,9 +1,9 @@
 name: 🐳 Build and push Docker image
 
 on:
-  push:
-    branches:
-      - main
+  create:
+    tags:
+      - '*'
 
 permissions:
   contents: read
@@ -40,4 +40,6 @@ jobs:
           file: ./Dockerfile
           target: prod
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/emiliosheinz/rinha-de-backend-2025-go:latest
+          tags: |
+            ghcr.io/emiliosheinz/rinha-de-backend-2025-go:${{ github.ref_name }}
+            ghcr.io/emiliosheinz/rinha-de-backend-2025-go:latest
