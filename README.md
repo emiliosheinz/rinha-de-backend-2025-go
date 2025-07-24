@@ -20,13 +20,13 @@ The system is composed of the following services:
 Incoming `POST /payments` requests return immediately (HTTP 202) after enqueueing a task. Background workers handle the actual payment processing to improve throughput and resilience.
 
 ### Health-Driven Routing
-A single leader polls `/payments/service-health` every 5 s (within the rate limit of one call per 5 s) and stores the metrics (`failing` flag and `minResponseTime`) in Redis. Routing logic:
+A single leader polls `/payments/service-health` every 5 s (within the rate limit of one call per 5 s) from the payments processors and stores the metrics (`failing` flag and `minResponseTime`) in Redis. Routing logic:
 
 - Always avoid routing to a processor marked as failing.
 - Switch to the fallback if the default's latency exceeds 1.25× the fallback's minimum response time.
 
 ### Leader Election
-Instances use a Redis-based leader election (SETNX with TTL renewal every 10 s) to ensure only one node performs health checks and updates the shared cache.
+Instances use a Redis-based leader election (SETNX with TTL renewal every 10 s) to ensure only one node performs health checks and updates the shared cache. 
 
 ### Data Persistence & Summary
 Successful payments are recorded in PostgreSQL with correlation ID, amount, timestamp, and chosen processor. The `GET /payments-summary` endpoint aggregates totals per processor, optionally filtered by time window (`from`/`to` in RFC3339Nano).
