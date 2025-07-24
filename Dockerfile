@@ -11,7 +11,8 @@ RUN go install github.com/air-verse/air@latest
 COPY . .
 CMD ["air", "-c", ".air.toml"]
 
-FROM scratch AS prod
+FROM alpine:3.20 AS prod
+RUN apk add --no-cache curl
 COPY --from=builder /app/api /api
 EXPOSE 8080
 CMD ["/api"]

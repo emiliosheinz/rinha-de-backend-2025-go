@@ -35,8 +35,14 @@ func main() {
 	http.HandleFunc("/payments", paymentsHandler.HandleCreatePayment)
 	http.HandleFunc("/payments-summary", paymentsHandler.HandleGetSummary)
 	http.HandleFunc("/purge-payments", paymentsHandler.HandlePurgePayments)
+	http.HandleFunc("/health", handleHealthCheck)
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
+}
+
+func handleHealthCheck(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("OK"))
 }
 
 func startQueueWorkersServer(paymentsService *payments.PaymentsService) {

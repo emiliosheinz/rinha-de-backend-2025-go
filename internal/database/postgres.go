@@ -3,6 +3,7 @@ package database
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/config"
@@ -18,14 +19,33 @@ func ConnectPostgres() (*sql.DB, error) {
 		config.PostgresDatabaseUser,
 		config.PostgresDatabasePassword,
 	)
-	db, err := sql.Open("postgres", connectionString)
-	if err != nil {
-		return nil, fmt.Errorf("failed to open database connection: %v", err)
+	
+	var db *sql.DB
+	var err error
+	maxRetries := 10
+	retryDelay := 2 * time.Second
+	
+	for i := 0; i < maxRetries; i++ {
+		db, err = sql.Open("postgres", connectionString)
+		if err != nil {
+			log.Printf("Attempt %d/%d: Failed to open database connection: %v", i+1, maxRetries, err)
+			time.Sleep(retryDelay)
+			continue
+		}
+		
+		err = db.Ping()
+		if err != nil {
+			log.Printf("Attempt %d/%d: Failed to ping database: %v", i+1, maxRetries, err)
+			db.Close()
+			time.Sleep(retryDelay)
+			continue
+		}
+		
+		break
 	}
-
-	err = db.Ping()
+	
 	if err != nil {
-		return nil, fmt.Errorf("failed to ping database: %v", err)
+		return nil, fmt.Errorf("failed to connect to database after %d attempts: %v", maxRetries, err)
 	}
 
 	db.SetMaxOpenConns(64)
