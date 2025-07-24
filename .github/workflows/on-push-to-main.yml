@@ -1,4 +1,4 @@
-name: 🔖 Tag and release  
+name: 🚀 On push to main  
 
 on:
   push:
@@ -11,6 +11,7 @@ permissions:
 
 jobs:
   tag:
+    name: 🔖 Tag Release
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -21,6 +22,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   build-and-push-docker-image:
+    name: 🐳 Build and Push Docker Image
     runs-on: ubuntu-latest
     needs: tag
     steps:
@@ -43,6 +45,13 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Fetch latest tag
+        id: get_tag
+        run: |
+          git fetch --tags
+          TAG=$(git describe --tags --abbrev=0)
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
       - name: Build and push Docker images
         uses: docker/build-push-action@v5.1.0
         with:
@@ -52,5 +61,5 @@ jobs:
           target: prod
           platforms: linux/amd64,linux/arm64
           tags: |
-            ghcr.io/emiliosheinz/rinha-de-backend-2025-go:${{ github.ref_name }}
+            ghcr.io/emiliosheinz/rinha-de-backend-2025-go:${{ steps.get_tag.outputs.tag }}
             ghcr.io/emiliosheinz/rinha-de-backend-2025-go:latest
