@@ -4,7 +4,7 @@ CREATE TYPE processor AS ENUM ('default', 'fallback');
 
 CREATE TABLE payments (
   id SERIAL PRIMARY KEY,
-  correlation_id VARCHAR(255) NOT NULL UNIQUE,  -- Make correlation_id unique to prevent duplicates
+  correlation_id VARCHAR(255) NOT NULL,
   amount DECIMAL NOT NULL,
   processed_at TIMESTAMP NOT NULL,
   processed_by processor NOT NULL

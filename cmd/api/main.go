@@ -52,8 +52,7 @@ func startQueueWorkersServer(paymentsService *payments.PaymentsService) {
 			Concurrency:              32,
 			DelayedTaskCheckInterval: time.Duration(500) * time.Millisecond,
 			RetryDelayFunc: func(n int, e error, t *asynq.Task) time.Duration {
-				// Exponential backoff: 1s, 2s, 4s, 8s, 16s...
-				return time.Duration(1<<uint(n-1)) * time.Second
+				return time.Duration(3) * time.Second
 			},
 		},
 	)
