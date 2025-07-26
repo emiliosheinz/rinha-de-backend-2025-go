@@ -1,4 +1,4 @@
-# Rinha de Backend 2025
+# 🐓 Rinha de Backend 2025
 
 This repository contains my Go-based implementation for the [Rinha de Backend 2025 challenge](https://github.com/zanfranceschi/rinha-de-backend-2025). The solution focuses on maximizing financial profit by intelligently routing payment requests between two Payment Processor services (default and fallback), handling service instabilities, and ensuring data consistency via a payment summary endpoint.
 
