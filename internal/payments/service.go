@@ -84,6 +84,7 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 	_, err = p.db.Exec(`
 		INSERT INTO payments (correlation_id, amount, processed_at, processed_by)
 		VALUES ($1, $2, $3, $4)
+		ON CONFLICT (correlation_id) DO NOTHING
 	`, input.CorrelationID, input.Amount, requestedAt, processor)
 
 	if err != nil {
