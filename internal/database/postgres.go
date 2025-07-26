@@ -25,7 +25,7 @@ func ConnectPostgres() (*sql.DB, error) {
 	maxRetries := 10
 	retryDelay := 2 * time.Second
 	
-	for i := 0; i < maxRetries; i++ {
+	for i := range maxRetries {
 		db, err = sql.Open("postgres", connectionString)
 		if err != nil {
 			log.Printf("Attempt %d/%d: Failed to open database connection: %v", i+1, maxRetries, err)
