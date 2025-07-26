@@ -2,6 +2,7 @@ services:
   api01: &api
       image: ghcr.io/emiliosheinz/rinha-de-backend-2025-go:latest
       hostname: api01
+      container_name: api01
       networks:
         - rinha
         - payment-processor
@@ -37,9 +38,11 @@ services:
   api02:
       <<: *api
       hostname: api02
+      container_name: api02
 
   nginx:
       image: nginx:1.25-alpine
+      container_name: nginx
       volumes:
         - ./nginx.conf:/etc/nginx/nginx.conf:ro
       depends_on:
@@ -68,6 +71,7 @@ services:
       restart: always
       hostname: ${DATABASE_HOSTNAME}
       command: postgres -c max_connections=512
+      container_name: postgres
       environment:
         - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
         - POSTGRES_USER=${DATABASE_USER}
@@ -91,6 +95,7 @@ services:
     image: redis:8-alpine
     restart: always
     hostname: redis
+    container_name: redis 
     command: >
       redis-server --save "" --appendonly no --maxclients 65535
                   --maxmemory-policy allkeys-lru --hz 100 --tcp-backlog 511 --timeout 0
@@ -112,4 +117,5 @@ networks:
     external: true
   rinha:
     driver: bridge
+    name: rinha
 
