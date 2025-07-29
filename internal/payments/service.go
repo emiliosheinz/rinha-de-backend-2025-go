@@ -79,6 +79,8 @@ func (p *PaymentsService) ProcessPayment(input ProcessPaymentInput) (*ProcessPay
 	if resp.StatusCode >= http.StatusBadRequest {
 		health.SetAsFailing(processor)
 		return nil, fmt.Errorf("processor returned status %d", resp.StatusCode)
+	} else {
+		health.SetAsSucceeding(processor)
 	}
 
 	_, err = p.db.Exec(`
@@ -161,14 +163,23 @@ func buildQuery(input SummarizePaymentsInput) (string, []any) {
 }
 
 func shouldUseFallbackProcessor(defaultHealth, fallbackHealth *health.HealthResponse) bool {
-	if defaultHealth.Failing {
-		return true
+	// If both are failing we want to try the default processor 
+	if fallbackHealth.Failing && defaultHealth.Failing {
+		return false
 	}
 
+	// If only fallback is failing we want to request the default processor 
 	if fallbackHealth.Failing {
 		return false
 	}
 
+	// If only default is failing we want to request the fallback
+	if defaultHealth.Failing {
+		return true
+	}
+
+	// If both are working but the default is 25% slower than the fallback 
+	// we want to request the fallback, otherwise, the default processor
 	return float64(defaultHealth.MinResponseTime) > 1.25*float64(fallbackHealth.MinResponseTime)
 }
 

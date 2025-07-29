@@ -195,8 +195,18 @@ func SetAsFailing(name string) error {
 	if isAlreadyFailing {
 		return nil
 	}
-	log.Printf("Setting %s as failing", name)
+	log.Printf("❌ Setting %s as failing", name)
 	return saveHealthResponse(name, &HealthResponse{Failing: true})
+}
+
+func SetAsSucceeding(name string) error {
+	current, err := CheckHealth(name)
+	isAlreadySucceeding := err == nil && current.Failing == false
+	if isAlreadySucceeding {
+		return nil
+	}
+	log.Printf("✅ Setting %s as succeeding", name)
+	return saveHealthResponse(name, &HealthResponse{Failing: false, MinResponseTime: 0})
 }
 
 func getKey(name string) string {
