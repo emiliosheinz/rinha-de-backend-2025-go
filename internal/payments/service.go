@@ -163,12 +163,12 @@ func buildQuery(input SummarizePaymentsInput) (string, []any) {
 }
 
 func shouldUseFallbackProcessor(defaultHealth, fallbackHealth *health.HealthResponse) bool {
-	// If both are failing we want to try the default processor 
+	// If both are failing we want to try the default processor
 	if fallbackHealth.Failing && defaultHealth.Failing {
 		return false
 	}
 
-	// If only fallback is failing we want to request the default processor 
+	// If only fallback is failing we want to request the default processor
 	if fallbackHealth.Failing {
 		return false
 	}
@@ -178,7 +178,7 @@ func shouldUseFallbackProcessor(defaultHealth, fallbackHealth *health.HealthResp
 		return true
 	}
 
-	// If both are working but the default is 25% slower than the fallback 
+	// If both are working but the default is 25% slower than the fallback
 	// we want to request the fallback, otherwise, the default processor
 	return float64(defaultHealth.MinResponseTime) > 1.25*float64(fallbackHealth.MinResponseTime)
 }

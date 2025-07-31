@@ -42,7 +42,6 @@ func (ph *PaymentsHandler) HandleCreatePayment(w http.ResponseWriter, r *http.Re
 			return
 		}
 		ph.queue.Enqueue(task)
-
 	}()
 	w.WriteHeader(http.StatusAccepted)
 }

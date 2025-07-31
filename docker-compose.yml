@@ -101,6 +101,7 @@ services:
                   --maxmemory 20mb --maxmemory-policy allkeys-lru 
                   --stop-writes-on-bgsave-error no --rdbcompression no
                   --hz 100 --tcp-backlog 511 --timeout 0
+                  --loglevel warning
     networks:
       - rinha
     healthcheck:

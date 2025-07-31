@@ -83,10 +83,8 @@ func (m *HealthManager) evaluateLeadership() {
 	}
 
 	if isLeader {
-		log.Println("Acting as leader. Ensuring health checks are running.")
 		m.startHealthCheck()
 	} else {
-		log.Println("Not the leader.")
 		m.stopHealthCheck()
 	}
 }
@@ -138,9 +136,7 @@ func (m *HealthManager) runHealthCheck() {
 
 		if err := saveHealthResponse(name, &healthResponse); err != nil {
 			log.Printf("Error saving health for %s: %v", name, err)
-		} else {
-			log.Printf("Health check for %s OK: %+v", name, healthResponse)
-		}
+		} 
 	}
 }
 
@@ -190,23 +186,11 @@ func CheckHealth(name string) (*HealthResponse, error) {
 }
 
 func SetAsFailing(name string) error {
-	current, err := CheckHealth(name)
-	isAlreadyFailing := err == nil && current.Failing
-	if isAlreadyFailing {
-		return nil
-	}
-	log.Printf("❌ Setting %s as failing", name)
 	return saveHealthResponse(name, &HealthResponse{Failing: true})
 }
 
 func SetAsSucceeding(name string) error {
-	current, err := CheckHealth(name)
-	isAlreadySucceeding := err == nil && current.Failing == false
-	if isAlreadySucceeding {
-		return nil
-	}
-	log.Printf("✅ Setting %s as succeeding", name)
-	return saveHealthResponse(name, &HealthResponse{Failing: false, MinResponseTime: 0})
+	return saveHealthResponse(name, &HealthResponse{Failing: false})
 }
 
 func getKey(name string) string {
