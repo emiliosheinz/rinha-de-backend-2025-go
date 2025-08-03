@@ -41,7 +41,7 @@ func (ph *PaymentsHandler) HandleCreatePayment(w http.ResponseWriter, r *http.Re
 			fmt.Fprintf(w, "Error decoding request body: %v\n", err)
 			return
 		}
-		ph.queue.Enqueue(task)
+		ph.queue.Enqueue(task, asynq.Queue("payments"))
 	}()
 	w.WriteHeader(http.StatusAccepted)
 }
