@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/emiliosheinz/rinha-de-backend-2025-go/internal/config"
 	"github.com/hibiken/asynq"
 )
 
@@ -41,7 +42,7 @@ func (ph *PaymentsHandler) HandleCreatePayment(w http.ResponseWriter, r *http.Re
 			fmt.Fprintf(w, "Error decoding request body: %v\n", err)
 			return
 		}
-		ph.queue.Enqueue(task)
+		ph.queue.Enqueue(task, asynq.Queue(config.InstanceID))
 	}()
 	w.WriteHeader(http.StatusAccepted)
 }

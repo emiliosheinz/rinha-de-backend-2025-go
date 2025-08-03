@@ -14,6 +14,7 @@ var (
 	PostgresDatabaseUser     string
 	PostgresDatabasePassword string
 	RedisURL                 string
+	InstanceID               string
 )
 
 func Init() {
@@ -55,6 +56,11 @@ func Init() {
 	RedisURL = os.Getenv("REDIS_URL")
 	if RedisURL == "" {
 		log.Fatal("REDIS_URL is not set")
+	}
+
+	InstanceID = os.Getenv("INSTANCE_ID")
+	if InstanceID == "" {
+		log.Fatal("INSTANCE_ID is not set")
 	}
 
 	log.Println("Configuration initialized successfully")
